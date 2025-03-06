@@ -4,8 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClasseResource\Pages;
 use App\Filament\Resources\ClasseResource\RelationManagers;
+use App\Models\AnoLetivo;
 use App\Models\Classe;
+use App\Models\Ensino;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,7 +28,23 @@ class ClasseResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Select::make('ano_letivo_id')
+                    ->label('Ano Letivo')
+                    ->options(AnoLetivo::all()->pluck('nome', 'id'))
+                    ->live()
+                    ->required(),
+                TextInput::make('nome')
+                    ->required()
+                    ->maxLength(255),
+                Select::make('ensino_id')
+                    ->label('Ensino')
+                    ->options(Ensino::all()->pluck('nome', 'id'))
+                    ->live()
+                    ->required(),
+
+                Textarea::make('descricao')
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -31,7 +52,19 @@ class ClasseResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('nome')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('ensino_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

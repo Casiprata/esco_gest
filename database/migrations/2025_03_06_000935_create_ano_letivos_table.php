@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Periodo;
-use App\Models\Turma;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('turmas', function (Blueprint $table) {
+        Schema::create('ano_letivos', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->string('descricao');
-            $table->foreignIdFor(Turma::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Periodo::class)->constrained()->cascadeOnDelete();
+            $table->string('ano_letivo')->unique();
+            $table->enum('estado', ['Aberto', 'Fechado'])->default('Aberto');
+            $table->date('data_inicio');
+            $table->date('data_fim');
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('turmas');
+        Schema::dropIfExists('ano_letivos');
     }
 };

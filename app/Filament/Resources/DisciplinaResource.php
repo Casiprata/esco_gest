@@ -6,6 +6,8 @@ use App\Filament\Resources\DisciplinaResource\Pages;
 use App\Filament\Resources\DisciplinaResource\RelationManagers;
 use App\Models\Disciplina;
 use Filament\Forms;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,7 +25,12 @@ class DisciplinaResource extends Resource
     {
         return $form
             ->schema([
-                //
+                TextInput::make('nome')
+                    ->required()
+                    ->maxLength(255),
+                Textarea::make('descricao')
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -31,7 +38,16 @@ class DisciplinaResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('nome')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

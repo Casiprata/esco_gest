@@ -4,8 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PeriodoResource\Pages;
 use App\Filament\Resources\PeriodoResource\RelationManagers;
+use App\Models\AnoLetivo;
 use App\Models\Periodo;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,7 +25,17 @@ class PeriodoResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Select::make('ano_letivo_id')
+                ->label('Ano Letivo')
+                ->options(AnoLetivo::pluck('ano_letivo', 'id')) // Garante que todas as opções estejam disponíveis
+                ->live()
+                ->default(fn () => AnoLetivo::latest('id')->value('id')) // Apenas seleciona o último ano letivo como padrão
+                ->required(),
+                Forms\Components\TextInput::make('nome')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Textarea::make('descricao')
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -31,7 +43,16 @@ class PeriodoResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('nome')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

@@ -4,8 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EnsinoResource\Pages;
 use App\Filament\Resources\EnsinoResource\RelationManagers;
+use App\Models\AnoLetivo;
 use App\Models\Ensino;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,7 +25,18 @@ class EnsinoResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Select::make('ano_letivo_id')
+                    ->label('Ano Letivo')
+                    ->options(AnoLetivo::all()->pluck('nome', 'id'))
+                    ->live()
+                    ->default(fn () => AnoLetivo::latest('id')->value('id'))
+                    ->required(),
+                Forms\Components\TextInput::make('nome')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Textarea::make('descricao')
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -31,7 +44,16 @@ class EnsinoResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('nome')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
