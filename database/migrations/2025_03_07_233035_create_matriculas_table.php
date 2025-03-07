@@ -23,9 +23,8 @@ return new class extends Migration
             $table->string('pai')->nullable();
             $table->string('mae')->nullable();
             $table->string('ano_letivo');
-            $table->foreignIdFor(Periodo::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Classe::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Turma::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Turma::class)->constrained()->nullOnDelete();
             $table->date('data_matricula');
             $table->string('foto')->nullable();
             $table->json('documentos')->nullable();

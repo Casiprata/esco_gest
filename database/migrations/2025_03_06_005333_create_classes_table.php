@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
-            $table->text('descricao');
+            $table->text('descricao')->nullable();
             $table->foreignIdFor(AnoLetivo::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Ensino::class)->constrained()->cascadeOnDelete();
             $table->timestamps();

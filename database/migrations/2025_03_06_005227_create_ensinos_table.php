@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(AnoLetivo::class)->constrained()->cascadeOnDelete();
             $table->string('nome');
-            $table->text('descricao');
+            $table->text('descricao')->nullable();
             $table->timestamps();
         });
     }

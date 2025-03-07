@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Matricula;
 use App\Models\Responsavel;
 use App\Models\Turma;
 use Illuminate\Database\Migrations\Migration;
@@ -15,13 +16,8 @@ return new class extends Migration
     {
         Schema::create('alunos', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->date('data_nascimento')->nullable();
-            $table->string('naturalidade')->nullable();
-            $table->foreignIdFor(Turma::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Responsavel::class)->constrained()->cascadeOnDelete();
-            $table->string('pai')->nullable();
-            $table->string('mae')->nullable();
+            $table->foreignIdFor(Matricula::class)->unique()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Responsavel::class)->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
         });
     }

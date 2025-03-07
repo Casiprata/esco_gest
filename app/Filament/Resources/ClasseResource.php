@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -29,13 +30,26 @@ class ClasseResource extends Resource
         return $form
             ->schema([
                 Select::make('ano_letivo_id')
-                    ->label('Ano Letivo')
-                    ->options(AnoLetivo::all()->pluck('nome', 'id'))
-                    ->live()
-                    ->required(),
+                ->label('Ano Letivo')
+                ->options(AnoLetivo::pluck('ano_letivo', 'id')) // Garante que todas as opções estejam disponíveis
+                ->live()
+                ->default(fn () => AnoLetivo::latest('id')->value('id')) // Apenas seleciona o último ano letivo como padrão
+                ->required(),
+
                 TextInput::make('nome')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->unique(
+                        table: Classe::class,
+                        column: 'nome',
+                        ignoreRecord: true, // Permite editar sem erro
+                        modifyRuleUsing: function ($rule, $get) {
+                            return $rule->where('ano_letivo_id', $get('ano_letivo_id'));
+                        }
+                    )
+                    ->validationMessages([
+                    'unique' => 'Já existe uma classe com este nome no ano letivo selecionado.',
+                    ]),
                 Select::make('ensino_id')
                     ->label('Ensino')
                     ->options(Ensino::all()->pluck('nome', 'id'))
@@ -43,41 +57,50 @@ class ClasseResource extends Resource
                     ->required(),
 
                 Textarea::make('descricao')
-                    ->required()
                     ->columnSpanFull(),
             ]);
     }
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('nome')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('ensino_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+{
+    return $table
+        ->columns([
+            Tables\Columns\TextColumn::make('nome')
+                ->label('Nome da Classe')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('ensino.nome')
+                ->label('Ensino')
+                ->sortable(),
+            Tables\Columns\TextColumn::make('anoLetivo.ano_letivo')
+                ->label('Ano Letivo')
+                ->sortable(),
+            Tables\Columns\TextColumn::make('created_at')
+                ->dateTime()
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+        ])
+        ->filters([
+            
+                SelectFilter::make('ano_letivo_id')
+                    ->label('Filtrar por Ano Letivo')
+                    ->options(AnoLetivo::pluck('ano_letivo', 'id'))
+                    ->query(function (Builder $query, array $data) {
+                        if (!isset($data['value'])) {
+                            return $query; // Se nenhum valor for selecionado, retorna sem filtro
+                        }
+
+                        return $query->where('ano_letivo_id', $data['value']);
+                    }),
+        ])
+        ->actions([
+            Tables\Actions\EditAction::make(),
+        ])
+        ->bulkActions([
+            Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]),
+        ]);
+}
 
     public static function getRelations(): array
     {

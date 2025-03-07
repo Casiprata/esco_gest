@@ -28,10 +28,11 @@ class VagaClasseResource extends Resource
         return $form
             ->schema([
                 Select::make('ano_letivo_id')
-                    ->label('Ano Letivo')
-                    ->options(AnoLetivo::all()->pluck('nome', 'id'))
-                    ->live()
-                    ->required(),
+                ->label('Ano Letivo')
+                ->options(AnoLetivo::pluck('ano_letivo', 'id')) // Garante que todas as opções estejam disponíveis
+                ->live()
+                ->default(fn () => AnoLetivo::latest('id')->value('id')) // Apenas seleciona o último ano letivo como padrão
+                ->required(),
                 Select::make('classe_id')
                 ->label('Classes')
                     ->options(Classe::all()->pluck('nome', 'id'))
@@ -41,7 +42,11 @@ class VagaClasseResource extends Resource
                     ->required()
                     ->numeric(),
                 Select::make('estado')
-                    ->options(['Aberta', 'Fechada'])
+                    ->options(
+                        [
+                            'Aberta' => 'Aberta',
+                            'Fechada' => 'Fechada',
+                            ])
                     ->required(),
             ]);
     }
@@ -50,14 +55,20 @@ class VagaClasseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('classe_id')
+                Tables\Columns\TextColumn::make('classe.nome')
+                    ->label('Classe')
+                    ->searchable()
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ano_letivo')
+                Tables\Columns\TextColumn::make('anoLetivo.ano_letivo')
+                    ->label('Ano Letivo')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('quantidade')
+                    ->label('Nº de Vagas')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('estado'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

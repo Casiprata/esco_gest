@@ -26,7 +26,11 @@ class AnoLetivoResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('ano_letivo')
                     ->required()
-                    ->maxLength(255),
+                    ->unique()
+                    ->maxLength(255)
+                    ->validationMessages([
+                    'unique' => 'Já existe uma Ano Lectivo com este nome',
+                    ]),
                 Select::make('estado')
                     ->options([
                         'Aberto' => 'Aberto',
@@ -45,7 +49,8 @@ class AnoLetivoResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('ano_letivo')
-                    ->searchable(),
+                ->searchable(),
+
                 Tables\Columns\TextColumn::make('data_inicio')
                     ->date()
                     ->sortable(),

@@ -26,16 +26,15 @@ class EnsinoResource extends Resource
         return $form
             ->schema([
                 Select::make('ano_letivo_id')
-                    ->label('Ano Letivo')
-                    ->options(AnoLetivo::all()->pluck('nome', 'id'))
-                    ->live()
-                    ->default(fn () => AnoLetivo::latest('id')->value('id'))
-                    ->required(),
+                ->label('Ano Letivo')
+                ->options(AnoLetivo::pluck('ano_letivo', 'id')) // Garante que todas as opções estejam disponíveis
+                ->live()
+                ->default(fn () => AnoLetivo::latest('id')->value('id')) // Apenas seleciona o último ano letivo como padrão
+                ->required(),
                 Forms\Components\TextInput::make('nome')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('descricao')
-                    ->required()
                     ->columnSpanFull(),
             ]);
     }
