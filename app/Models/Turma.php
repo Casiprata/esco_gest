@@ -23,4 +23,9 @@ class Turma extends Model
         return $this->belongsTo(AnoLetivo::class);
     }
 
+    public function professores()
+    {
+        return $this->belongsToMany(Professor::class, 'disciplina_professor_turma')
+                    ->withPivot('disciplina_id');
+    }
 }

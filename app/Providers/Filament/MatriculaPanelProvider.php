@@ -30,6 +30,7 @@ class MatriculaPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->viteTheme('resources/css/filament/matricula/theme.css')
             ->discoverResources(in: app_path('Filament/Matricula/Resources'), for: 'App\\Filament\\Matricula\\Resources')
             ->discoverPages(in: app_path('Filament/Matricula/Pages'), for: 'App\\Filament\\Matricula\\Pages')
             ->pages([

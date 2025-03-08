@@ -30,6 +30,7 @@ class ResponsavelPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->viteTheme('resources/css/filament/responsavel/theme.css')
             ->discoverResources(in: app_path('Filament/Responsavel/Resources'), for: 'App\\Filament\\Responsavel\\Resources')
             ->discoverPages(in: app_path('Filament/Responsavel/Pages'), for: 'App\\Filament\\Responsavel\\Pages')
             ->pages([

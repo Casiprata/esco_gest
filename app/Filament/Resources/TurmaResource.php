@@ -73,6 +73,7 @@ class TurmaResource extends Resource
             Textarea::make('descricao')
                 ->required()
                 ->columnSpanFull(),
+            
         ]);
 }
 

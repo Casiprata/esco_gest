@@ -30,6 +30,7 @@ class ProfessorPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->viteTheme('resources/css/filament/professor/theme.css')
             ->discoverResources(in: app_path('Filament/Professor/Resources'), for: 'App\\Filament\\Professor\\Resources')
             ->discoverPages(in: app_path('Filament/Professor/Pages'), for: 'App\\Filament\\Professor\\Pages')
             ->pages([

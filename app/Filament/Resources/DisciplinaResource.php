@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -19,7 +20,7 @@ class DisciplinaResource extends Resource
 {
     protected static ?string $model = Disciplina::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
     public static function form(Form $form): Form
     {
@@ -29,7 +30,6 @@ class DisciplinaResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Textarea::make('descricao')
-                    ->required()
                     ->columnSpanFull(),
             ]);
     }
@@ -38,13 +38,20 @@ class DisciplinaResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nome')
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+               TextColumn::make('nome')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('created_at')
+                    ->label('Data de Criação')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
+                    ->label('Data de Atualização')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -53,7 +60,14 @@ class DisciplinaResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Editar')
+                    ->icon('heroicon-o-pencil')
+                    ->color('primary'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Excluir')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

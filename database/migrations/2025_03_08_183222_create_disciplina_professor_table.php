@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Disciplina;
+use App\Models\Professor;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,10 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categorias', function (Blueprint $table) {
+        Schema::create('disciplina_professor', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->text('descricao')->nullable();
+            $table->foreignIdFor(Disciplina::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Professor::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categorias');
+        Schema::dropIfExists('disciplina_professor');
     }
 };
