@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Aluno;
+use App\Models\AnoLetivo;
 use App\Models\Classe;
 use App\Models\Periodo;
 use App\Models\Turma;
@@ -22,9 +23,9 @@ return new class extends Migration
             $table->string('naturalidade')->nullable();
             $table->string('pai')->nullable();
             $table->string('mae')->nullable();
-            $table->string('ano_letivo');
+            $table->foreignIdFor(AnoLetivo::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Classe::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Turma::class)->constrained()->nullOnDelete();
+            $table->foreignIdFor(Turma::class)->nullable()->constrained()->nullOnDelete();
             $table->date('data_matricula');
             $table->string('foto')->nullable();
             $table->json('documentos')->nullable();

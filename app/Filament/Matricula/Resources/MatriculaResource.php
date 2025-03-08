@@ -2,57 +2,154 @@
 
 namespace App\Filament\Matricula\Resources;
 
-use App\Filament\Matricula\Resources\MatriculaResource\Pages;
-use App\Filament\Matricula\Resources\MatriculaResource\RelationManagers;
+use App\Filament\Resources\MatriculaResource\Pages;
+use App\Models\AnoLetivo;
+use App\Models\Classe;
 use App\Models\Matricula;
+use App\Models\VagaClasse;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MatriculaResource extends Resource
 {
     protected static ?string $model = Matricula::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nome')
+                TextInput::make('nome')
+                    ->label('Nome do Aluno')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DatePicker::make('data_nascimento'),
-                Forms\Components\TextInput::make('naturalidade')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('pai')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('mae')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('ano_letivo')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('classe_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DatePicker::make('data_matricula')
+
+                DatePicker::make('data_nascimento')
+                    ->label('Data de Nascimento')
+                    ->nullable(),
+
+                TextInput::make('naturalidade')
+                    ->label('Naturalidade')
+                    ->nullable(),
+
+                TextInput::make('pai')
+                    ->label('Nome do Pai')
+                    ->nullable(),
+
+                TextInput::make('mae')
+                    ->label('Nome da Mãe')
+                    ->nullable(),
+
+                Select::make('ano_letivo_id')
+                    ->label('Ano Letivo')
+                    ->options(AnoLetivo::pluck('ano_letivo', 'id')) // Garante que todas as opções estejam disponíveis
+                    ->live()
+                    ->default(fn() => AnoLetivo::latest('id')->value('id')) // Apenas seleciona o último ano letivo como padrão
                     ->required(),
-                Forms\Components\TextInput::make('foto')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\Textarea::make('documentos')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('estado')
+
+                Select::make('classe_id')
+                    ->label('Classe')
+                    ->options(
+                        fn($get) =>
+                        Classe::where('ano_letivo_id', $get('ano_letivo_id'))
+                            ->pluck('nome', 'id')
+                    )
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($state, $set, $get) {
+                        $anoLetivo = $get('ano_letivo_id');
+                        $classeId = $state;
+
+                        if (!$anoLetivo || !$classeId)
+                            return;
+
+                        $vaga = VagaClasse::where('classe_id', $classeId)
+                            ->where('ano_letivo_id', $anoLetivo)
+                            ->first();
+
+                        if (!$vaga) {
+                            Notification::make()
+                                ->title('Vagas não definidas')
+                                ->body('⚠️ Não foram definidas vagas para classe selecionada.')
+                                ->danger()
+                                ->send();
+
+                            $set('classe_id', null);
+                            $set('forcar_atualizacao', now()); // Dispara atualização do formulário
+                            return;
+                        }
+
+                        if ($vaga->estado !== 'Aberta') {
+                            Notification::make()
+                                ->title('Matrículas fechadas')
+                                ->body('⚠️ As matrículas para a classe selecionada estão fechadas.')
+                                ->danger()
+                                ->send();
+
+                            $set('classe_id', null);
+                            //$set('forcar_atualizacao', now());
+                            return;
+                        }
+
+                        $matriculados = Matricula::where('classe_id', $classeId)
+                            ->where('ano_letivo_id', $anoLetivo)
+                            ->count();
+
+                        if ($matriculados >= $vaga->quantidade) {
+                            Notification::make()
+                                ->title('Erro')
+                                ->body('⚠️ Não há mais vagas disponíveis para esta classe.')
+                                ->danger()
+                                ->send();
+
+                            $set('classe_id', null);
+                        }
+                    }),
+
+                DatePicker::make('data_matricula')
+                    ->label('Data da Matrícula')
+                    ->default(now())
                     ->required(),
+
+                FileUpload::make('foto')
+                    ->label('Foto do Aluno')
+                    ->nullable(),
+
+                Repeater::make('documentos')
+                    ->label('Documentos')
+                    ->schema([
+                        Grid::make(2)->schema([ // Cria uma grade com duas colunas
+                            TextInput::make('tipo')
+                                ->label('Tipo')
+                                ->required()
+                                ->columnSpan(1), // Ocupa metade da largura
+
+                            FileUpload::make('documento_pdf')
+                                ->label('Documento')
+                                ->columnSpan(1), // Ocupa metade da largura
+                        ]),
+                    ])
+                    ->addable(true)
+                    ->deletable(true)
+                    ->default([])
+                    ->columnSpanFull(), // Ocupa toda a largura do formulário
+
                 Forms\Components\Textarea::make('observacoes')
-                    ->columnSpanFull(),
+                    ->label('Observações')
+                    ->nullable(),
             ]);
     }
 
@@ -61,53 +158,58 @@ class MatriculaResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nome')
+                    ->label('Nome do Aluno')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('data_nascimento')
-                    ->date()
+
+                Tables\Columns\TextColumn::make('anoLetivo.ano_letivo')
+                    ->label('Ano Letivo')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('naturalidade')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('pai')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('mae')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('ano_letivo')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('classe_id')
-                    ->numeric()
+
+                Tables\Columns\TextColumn::make('classe.nome')
+                    ->label('Classe')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('estado')
+                    ->label('Estado da Matrícula')
+                    ->badge()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('data_matricula')
+                    ->label('Data da Matrícula')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('foto')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('estado'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('ano_letivo_id')
+                    ->label('Filtrar por Ano Letivo')
+                    ->options(AnoLetivo::pluck('ano_letivo', 'id'))
+                    ->query(
+                        fn(Builder $query, array $data) =>
+                        $data['value'] ? $query->where('ano_letivo_id', $data['value']) : $query
+                    ),
+
+                SelectFilter::make('classe_id')
+                    ->label('Filtrar por Classe')
+                    ->options(Classe::pluck('nome', 'id'))
+                    ->query(
+                        fn(Builder $query, array $data) =>
+                        $data['value'] ? $query->where('classe_id', $data['value']) : $query
+                    ),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+                Tables\Actions\DeleteBulkAction::make(),
+            ])
+            ->defaultSort('ano_letivo_id', 'desc');
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+            // Aqui podem ser adicionadas relações, como o responsável, se necessário
         ];
     }
 
