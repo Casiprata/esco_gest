@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\TurmaResource\Pages;
 
 use App\Filament\Resources\TurmaResource;
+use App\Models\Disciplina;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class CreateTurma extends CreateRecord
 {
@@ -14,4 +16,6 @@ class CreateTurma extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+   
 }

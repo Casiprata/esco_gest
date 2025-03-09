@@ -28,4 +28,10 @@ class Turma extends Model
         return $this->belongsToMany(Professor::class, 'disciplina_professor_turma')
                     ->withPivot('disciplina_id');
     }
+
+    public function disciplinasProfessores()
+    {
+        return $this->hasMany(DisciplinaProfessorTurma::class);
+    }
 }
+

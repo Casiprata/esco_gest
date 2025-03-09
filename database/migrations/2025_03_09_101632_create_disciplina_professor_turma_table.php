@@ -16,9 +16,9 @@ return new class extends Migration
     {
         Schema::create('disciplina_professor_turma', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Disciplina::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Professor::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Turma::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Professor::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Disciplina::class)->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
         });
     }

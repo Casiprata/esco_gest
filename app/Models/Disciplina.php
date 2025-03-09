@@ -10,16 +10,8 @@ class Disciplina extends Model
 
     public function professores()
     {
-        return $this->belongsToMany(Professor::class);
+        return $this->belongsToMany(Professor::class, 'disciplina_professor_turma')
+                    ->withPivot('turma_id');
     }
-
-    public function turmas()
-    {
-        return $this->belongsToMany(Turma::class, 'disciplina_professor_turma')
-                    ->withPivot('professor_id');
-    }
-
-    
-
 
 }
