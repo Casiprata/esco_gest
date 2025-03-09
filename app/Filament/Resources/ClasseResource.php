@@ -23,7 +23,7 @@ class ClasseResource extends Resource
 {
     protected static ?string $model = Classe::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
     public static function form(Form $form): Form
     {
@@ -80,7 +80,7 @@ class ClasseResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
         ])
         ->filters([
-            
+
                 SelectFilter::make('ano_letivo_id')
                     ->label('Filtrar por Ano Letivo')
                     ->options(AnoLetivo::pluck('ano_letivo', 'id'))

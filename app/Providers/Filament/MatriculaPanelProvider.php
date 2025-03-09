@@ -28,13 +28,13 @@ class MatriculaPanelProvider extends PanelProvider
             ->path('matricula')
             ->login(CustomLoginPage::class)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => ("#861A10"),
             ])
-            ->viteTheme('resources/css/filament/matricula/theme.css')
+            //->viteTheme('resources/css/filament/matricula/theme.css')
             ->discoverResources(in: app_path('Filament/Matricula/Resources'), for: 'App\\Filament\\Matricula\\Resources')
             ->discoverPages(in: app_path('Filament/Matricula/Pages'), for: 'App\\Filament\\Matricula\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Pages\DashboardMatricula::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Matricula/Widgets'), for: 'App\\Filament\\Matricula\\Widgets')
             ->widgets([

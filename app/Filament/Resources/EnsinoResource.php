@@ -19,7 +19,7 @@ class EnsinoResource extends Resource
 {
     protected static ?string $model = Ensino::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     public static function form(Form $form): Form
     {

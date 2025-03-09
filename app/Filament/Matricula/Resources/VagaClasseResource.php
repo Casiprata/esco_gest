@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -80,10 +81,22 @@ class VagaClasseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('ano_letivo_id')
+                ->label('Filtrar por Ano Letivo')
+                ->options(AnoLetivo::pluck('ano_letivo', 'id'))
+                ->default(fn() => AnoLetivo::latest('id')->value('id')) // Define o último ano letivo como padrão
+                ->query(function (Builder $query, array $data) {
+                    if (!isset($data['value'])) {
+                        return $query; // Se nenhum valor for selecionado, retorna sem filtro
+                    }
+
+                    return $query->whereHas('classe', function ($q) use ($data) {
+                        $q->where('ano_letivo_id', $data['value']);
+                    });
+                }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

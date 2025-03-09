@@ -154,57 +154,43 @@ class MatriculaResource extends Resource
     }
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('nome')
-                    ->label('Nome do Aluno')
-                    ->searchable(),
+{
+    return $table
+        ->query(
+            fn (Builder $query) => $query->where('ano_letivo_id', AnoLetivo::latest('id')->value('id'))
+        )
+        ->columns([
+            Tables\Columns\TextColumn::make('nome')
+                ->label('Nome do Aluno')
+                ->searchable(),
 
-                Tables\Columns\TextColumn::make('anoLetivo.ano_letivo')
-                    ->label('Ano Letivo')
-                    ->sortable(),
+            Tables\Columns\TextColumn::make('anoLetivo.ano_letivo')
+                ->label('Ano Letivo')
+                ->sortable(),
 
-                Tables\Columns\TextColumn::make('classe.nome')
-                    ->label('Classe')
-                    ->sortable(),
+            Tables\Columns\TextColumn::make('classe.nome')
+                ->label('Classe')
+                ->sortable(),
 
-                Tables\Columns\TextColumn::make('estado')
-                    ->label('Estado da Matrícula')
-                    ->badge()
-                    ->sortable(),
+            Tables\Columns\TextColumn::make('estado')
+                ->label('Estado da Matrícula')
+                ->badge()
+                ->sortable(),
 
-                Tables\Columns\TextColumn::make('data_matricula')
-                    ->label('Data da Matrícula')
-                    ->date()
-                    ->sortable(),
-            ])
-            ->filters([
-                SelectFilter::make('ano_letivo_id')
-                    ->label('Filtrar por Ano Letivo')
-                    ->options(AnoLetivo::pluck('ano_letivo', 'id'))
-                    ->query(
-                        fn(Builder $query, array $data) =>
-                        $data['value'] ? $query->where('ano_letivo_id', $data['value']) : $query
-                    ),
-
-                SelectFilter::make('classe_id')
-                    ->label('Filtrar por Classe')
-                    ->options(Classe::pluck('nome', 'id'))
-                    ->query(
-                        fn(Builder $query, array $data) =>
-                        $data['value'] ? $query->where('classe_id', $data['value']) : $query
-                    ),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ])
-            ->defaultSort('ano_letivo_id', 'desc');
-    }
+            Tables\Columns\TextColumn::make('data_matricula')
+                ->label('Data da Matrícula')
+                ->date()
+                ->sortable(),
+        ])
+        ->actions([
+            Tables\Actions\EditAction::make(),
+            Tables\Actions\ViewAction::make(),
+        ])
+        ->bulkActions([
+            Tables\Actions\DeleteBulkAction::make(),
+        ])
+        ->defaultSort('data_matricula', 'desc'); // Ordena pela data mais recente
+}
 
     public static function getRelations(): array
     {

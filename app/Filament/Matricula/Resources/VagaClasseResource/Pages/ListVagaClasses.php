@@ -10,10 +10,4 @@ class ListVagaClasses extends ListRecords
 {
     protected static string $resource = VagaClasseResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
 }
